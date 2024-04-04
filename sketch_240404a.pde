@@ -1,16 +1,15 @@
-int ballX = 300;
-int ballY = 200;
-int ballWidth = 20;
-int ballHeight = 20;
-int ballSpeedX = 5;
-int ballSpeedY = 5;
+int ballX;
+int ballY;
+int ballDim = 20;
+float ballSpeedX = 4;
+float ballSpeedY = 4;
 
-int paddleWidth = 10;
-int paddleHeight = 80;
-int paddleSpeed = 5;
+int racketWidth = 10;
+int racketHeight = 80;
+float racketSpeed = 5;
 
-int leftPaddleY;
-int rightPaddleY;
+int racketLY;
+int racketRY;
 
 int leftScore = 0;
 int rightScore = 0;
@@ -20,41 +19,56 @@ boolean sPressed = false;
 boolean upPressed = false;
 boolean downPressed = false;
 
+boolean noCollision = false;
+
 void setup() {
   size(600, 400);
-  leftPaddleY = height / 2 - paddleHeight / 2;
-  rightPaddleY = height / 2 - paddleHeight / 2;
+  racketLY = racketRY = height / 2 - racketHeight / 2;
+  ballX = width / 2;
+  ballY = height / 2;
 }
 
 void draw() {
-  background(255);
+  background(0);
   
-  // draw paddles
-  fill(0);
-  rect(0, leftPaddleY, paddleWidth, paddleHeight);
-  rect(width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
+  // Schläger zeichnen
+  fill(255);
+  rect(0, racketLY, racketWidth, racketHeight);
+  rect(width - racketWidth, racketRY, racketWidth, racketHeight);
   
-  // draw ball
-  rect(ballX, ballY, ballWidth, ballHeight);
+  // Mittellinie zeichnen
+  stroke(125);
+  strokeWeight(3);
+  line(width / 2, 0, width / 2, height);
+  strokeWeight(0);
+    
+  // Ball Zeichnen
+  rect(ballX, ballY, ballDim, ballDim);
   
   // move ball
-  ballX += ballSpeedX;
-  ballY += ballSpeedY;
+  ballX += int(ballSpeedX);
+  ballY += int(ballSpeedY);
   
-  // check collision with paddles
-  if (ballX <= paddleWidth && ballY >= leftPaddleY && ballY <= leftPaddleY + paddleHeight) {
+  // check collision with rackets
+  if (noCollision == false && ballX <= racketWidth && ballY > racketLY - ballDim && ballY < racketLY + racketHeight + ballDim) {
     ballSpeedX *= -1;
+    noCollision = true;
   }
-  if (ballX >= width - paddleWidth && ballY >= rightPaddleY && ballY <= rightPaddleY + paddleHeight) {
+  if (noCollision == false && ballX >= width - racketWidth - ballDim && ballY > racketRY - ballDim && ballY < racketRY + racketHeight + ballDim) {
     ballSpeedX *= -1;
+    noCollision = true;
+  }
+  
+  if (ballX >= 2 * racketWidth && ballX <= width - 2 * racketWidth - ballDim) {
+    noCollision = false;
   }
   
   // check collision with top and bottom walls
-  if (ballY <= 0 || ballY >= height - ballHeight) {
+  if (ballY <= 0 || ballY >= height - ballDim) {
     ballSpeedY *= -1;
   }
   
-  // check if ball went past paddles
+  // check if ball went past rackets
   if (ballX < 0) {
     rightScore++;
     resetBall();
@@ -67,25 +81,36 @@ void draw() {
   // display scores
   textSize(32);
   textAlign(CENTER, CENTER);
-  text(leftScore + " : " + rightScore, width / 2, 50);
+  text(leftScore + "    " + rightScore, width / 2, 50);
   
-  // move paddles with keys
+  // NPC
+  
+//  while(racketRY != ballY + ballDim / 2 - racketHeight / 2){
+//    if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
+//      racketRY += racketSpeed;
+//    } else {
+//  }
+  
+  
+  //racketRY = ballY + ballDim / 2 - racketHeight / 2;
+  
+  // move rackets with keys
   if (wPressed) {
-    leftPaddleY -= paddleSpeed;
+    racketLY -= racketSpeed;
   }
   if (sPressed) {
-    leftPaddleY += paddleSpeed;
+    racketLY += racketSpeed;
   }
   if (upPressed) {
-    rightPaddleY -= paddleSpeed;
+    racketRY -= racketSpeed;
   }
   if (downPressed) {
-    rightPaddleY += paddleSpeed;
+    racketRY += racketSpeed;
   }
   
-  // ensure paddles stay within bounds
-  leftPaddleY = constrain(leftPaddleY, 0, height - paddleHeight);
-  rightPaddleY = constrain(rightPaddleY, 0, height - paddleHeight);
+  // ensure rackets stay within bounds
+  racketLY = constrain(racketLY, 0, height - racketHeight);
+  racketRY = constrain(racketRY, 0, height - racketHeight);
 }
 
 void keyPressed() {
@@ -119,8 +144,11 @@ void keyReleased() {
 }
 
 void resetBall() {
-  ballX = width / 2 - ballWidth / 2;
-  ballY = height / 2 - ballHeight / 2;
-  ballSpeedX *= random(1) > 0.5 ? 1 : -1; // randomize initial direction
-  ballSpeedY *= random(-5, 5); // randomize initial vertical speed
+  ballX = width / 2 - ballDim / 2;
+  ballY = height / 2 - ballDim / 2;
+  if (abs(ballSpeedX) * 1.05 <= 9){
+    ballSpeedX *= 1.05;
+    ballSpeedY *= 1.05;
+    racketSpeed *= 1.05;
+  }
 }
