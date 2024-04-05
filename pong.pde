@@ -1,10 +1,17 @@
+int mode = 0;
+//0 = Homescreen
+//1 = 2 Spieler
+//2 = 1 Spieler
+//3 = 1 Spieler unmöglich
+//4 = Wandmodus
+
 float difficulty = 0.8;
 
 int ballX;
 int ballY;
 int ballDim = 20;
 float ballSpeedX = 4;
-float ballSpeedY = 4;
+float ballSpeedY = 0;
 
 int racketWidth = 10;
 int racketHeight = 80;
@@ -22,6 +29,7 @@ boolean upPressed = false;
 boolean downPressed = false;
 
 boolean noCollision = false;
+int YCap = 0;
 
 void setup() {
   size(600, 400);
@@ -47,30 +55,66 @@ void draw() {
   // Ball Zeichnen
   rect(ballX, ballY, ballDim, ballDim);
   
-  // move ball
+  // Ballbewegung
   ballX += int(ballSpeedX);
   ballY += int(ballSpeedY);
   
-  // check collision with rackets
+  // Kolission mit Schlägern
   if (noCollision == false && ballX <= racketWidth && ballY > racketLY - ballDim && ballY < racketLY + racketHeight + ballDim) {
-    ballSpeedX *= -1;
-    noCollision = true;
+    if (abs(ballSpeedX) < 11){
+      ballSpeedX = abs(ballSpeedX) + 0.25;
+      racketSpeed += 0.25;
+    } else {ballSpeedX *= -1;}
+    
+    // Schräges abprallen im oberen & unteren drittel
+    if (ballY + ballDim / 2 < racketLY + racketHeight / 3)  {
+      ballSpeedY -= 1.5;
+    }
+    if (ballY + ballDim / 2 > racketLY + racketHeight / 3 * 2) {
+      ballSpeedY += 1.5;
+    }
+    
+    noCollision = true; // Verhindern das die richtung mehrfach geändert wird
+    
+    if (ballSpeedY <= 0.2){YCap += 1;} // Wiederholtes waagerechtes hin-und-her-spielen verhindern
+    if (YCap >= 3) {
+      ballSpeedY += 3;
+      YCap = 0;
+    }
   }
   if (noCollision == false && ballX >= width - racketWidth - ballDim && ballY > racketRY - ballDim && ballY < racketRY + racketHeight + ballDim) {
-    ballSpeedX *= -1;
+    if (abs(ballSpeedX) < 11){
+      ballSpeedX = -1 * (abs(ballSpeedX) + 0.25);
+      racketSpeed += 0.25;
+    } else {ballSpeedX *= -1;}
+    
+    if (ballY + ballDim / 2 < racketRY + racketHeight / 3)  {
+      ballSpeedY -= 1.5;
+    }
+    if (ballY + ballDim / 2 > racketRY + racketHeight / 3 * 2) {
+      ballSpeedY += 1.5;
+    }
+    
     noCollision = true;
+    
+    if (ballSpeedY <= 0.2){YCap += 1;}
+    if (YCap >= 3) {
+      ballSpeedY -= 3;
+      YCap = 0;
+    }
   }
   
+  // Kollisionen wieder erlauben sobald der Ball aus der Nähe des Schlägers ist
   if (ballX >= 2 * racketWidth && ballX <= width - 2 * racketWidth - ballDim) {
     noCollision = false;
   }
   
-  // check collision with top and bottom walls
+  // Kollision obere & untere Wand
   if (ballY <= 0 || ballY >= height - ballDim) {
     ballSpeedY *= -1;
   }
   
-  // check if ball went past rackets
+  // Tore zählen
   if (ballX < 0) {
     rightScore++;
     resetBall();
@@ -80,23 +124,27 @@ void draw() {
     resetBall();
   }
   
-  // display scores
+  textSize(20);
+  textAlign(LEFT, TOP);
+  text(YCap + ballSpeedY, 1, 1);
+  
+  // Punkteanzeige
   textSize(32);
   textAlign(CENTER, CENTER);
   text(leftScore + "    " + rightScore, width / 2, 50);
   
   // NPC
   
-  if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
-    racketRY += difficulty * racketSpeed;
-  } else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
-    racketRY -= difficulty * racketSpeed;
-  }
+  //if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
+  //  racketRY += difficulty * racketSpeed;
+  //} else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
+  //  racketRY -= difficulty * racketSpeed;
+  //}
   
   
   //racketRY = ballY + ballDim / 2 - racketHeight / 2;
   
-  // move rackets with keys
+  // Tastenaktionen
   if (wPressed) {
     racketLY -= racketSpeed;
   }
@@ -110,11 +158,12 @@ void draw() {
     racketRY += racketSpeed;
   }
   
-  // ensure rackets stay within bounds
+  // Beschränkung der Schlägerbewegung
   racketLY = constrain(racketLY, 0, height - racketHeight);
   racketRY = constrain(racketRY, 0, height - racketHeight);
 }
 
+//Tastenerfassung
 void keyPressed() {
   if (key == 'w') {
     wPressed = true;
@@ -145,12 +194,11 @@ void keyReleased() {
   }
 }
 
+// Ball zurücksetzen
 void resetBall() {
   ballX = width / 2 - ballDim / 2;
   ballY = height / 2 - ballDim / 2;
-  if (abs(ballSpeedX) * 1.05 <= 9){
-    ballSpeedX *= 1.05;
-    ballSpeedY *= 1.05;
-    racketSpeed *= 1.05;
-  }
+  ballSpeedX = 4;
+  ballSpeedY = 0;
+  racketSpeed = 5;
 }
