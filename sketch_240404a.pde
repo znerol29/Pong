@@ -1,3 +1,5 @@
+float difficulty = 0.8;
+
 int ballX;
 int ballY;
 int ballDim = 20;
@@ -85,12 +87,10 @@ void draw() {
   
   // NPC
   
-  while(racketRY != ballY + ballDim / 2 - racketHeight / 2){
-    if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
-      racketRY += racketSpeed;
-    } else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
-      racketRY -= racketSpeed;
-    }
+  if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
+    racketRY += difficulty * racketSpeed;
+  } else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
+    racketRY -= difficulty * racketSpeed;
   }
   
   
