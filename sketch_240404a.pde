@@ -85,11 +85,13 @@ void draw() {
   
   // NPC
   
-//  while(racketRY != ballY + ballDim / 2 - racketHeight / 2){
-//    if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
-//      racketRY += racketSpeed;
-//    } else {
-//  }
+  while(racketRY != ballY + ballDim / 2 - racketHeight / 2){
+    if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
+      racketRY += racketSpeed;
+    } else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
+      racketRY -= racketSpeed;
+    }
+  }
   
   
   //racketRY = ballY + ballDim / 2 - racketHeight / 2;
