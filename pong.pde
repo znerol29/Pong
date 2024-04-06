@@ -1,12 +1,15 @@
 int mode = 0;
+int altmode = 0;
 //0 = Homescreen
 //1 = 2 Spieler
 //2 = 1 Spieler
 //3 = 1 Spieler unmöglich
 //4 = Wandmodus
+//5 = Gewonnen Bildschirm
 
 float difficulty = 0.4; // Min 0.3!
 int hitCount = 0;
+int hiScore;
 float incPerHit = 0.1;
 
 int demHeight;
@@ -42,6 +45,7 @@ void setup() {
   racketLY = racketRY = height / 2 - racketHeight / 2;
   ballX = width / 2 - ballDim / 2;
   ballY = height / 2 - ballDim / 2;
+  hiScore = Integer.parseInt(loadStrings("Wall_Hi.txt")[0]);
 }
 
 void draw() {
@@ -50,10 +54,12 @@ void draw() {
   
   if (mode == 0){
     fill(255);
+    stroke(125);
+    strokeWeight(5);
     rect(0.1 * width, 0.1 * height, 0.8 * width, 0.2 * height);
-    rect(0.1 * width, 0.3 * height, 0.8 * width, 0.2 * height);
-    rect(0.1 * width, 0.5 * height, 0.8 * width, 0.2 * height);
+    rect(0.1 * width, 0.3 * height, 0.8 * width, 0.4 * height);
     rect(0.1 * width, 0.7 * height, 0.8 * width, 0.2 * height);
+    strokeWeight(0);
     
     textFont(createFont("Arial Bold", 32));
     textSize(32);
@@ -65,7 +71,7 @@ void draw() {
     
     textFont(createFont("Arial", 18));
     textSize(18);
-    text("Computer-Schwierigkeit", width / 2, 0.5375 * height);
+    text("Wähle den Schwierigkeitsgrad", width / 2, 0.525 * height);
     
     textFont(createFont("Arial Bold", 32));
     textSize(32);
@@ -109,7 +115,7 @@ void draw() {
   }
   
   
-  if (mode >= 1){
+  if (mode >= 1 && mode != 5){
     // Home-Button
     fill(255);
     rect(5, height - 30, 25, 25);
@@ -128,8 +134,20 @@ void draw() {
     fill(255);
     textSize(32);
     textAlign(CENTER, CENTER);
-    if (mode == 4) {text(hitCount, 25, 25);
-    } else {text(leftScore + "    " + rightScore, width / 2, 50);}
+    if (mode == 4) {
+      textAlign(LEFT, CENTER);
+      textSize(20);
+      text("Score: " + hitCount, 15, 25);
+      text("Hiscore: " + hiScore, 15, 45);
+      if (hiScore < hitCount){
+        saveStrings("Wall_Hi.txt", new String [] {Integer.toString(hitCount)});
+        hiScore = hitCount;
+      }
+      textAlign(CENTER, CENTER);
+      textSize(32);
+    } else {
+      text(leftScore + "    " + rightScore, width / 2, 50);
+    }
     
     // Schläger zeichnen
     fill(255);
@@ -224,9 +242,9 @@ void draw() {
     
     // 1 Spieler
     if (mode == 2){
-      if (racketRY + racketHeight / 2 < ballY + ballDim / 2) {
+      if (racketRY + racketHeight * 0.6 < ballY + ballDim / 2) {
         racketRY += difficulty * racketSpeed;
-      } else if (racketRY + racketHeight / 2 > ballY + ballDim / 2) {
+      } else if (racketRY + racketHeight * 0.4 > ballY + ballDim / 2) {
         racketRY -= difficulty * racketSpeed;
       }
     }
@@ -253,9 +271,49 @@ void draw() {
       }
     }
     
+    // Maussteuerung - Funktioniert nicht gut
+    //if (mouseX < width / 2){
+    //  if (racketLY + racketHeight * 0.5 < mouseY) {
+    //    racketLY += racketSpeed;
+    //  } else if (racketRY + racketHeight * 0.5 > mouseY) {
+    //    racketLY -= racketSpeed;
+    //  }
+    //}
+    
     // Beschränkung der Schlägerbewegung
     racketLY = constrain(racketLY, 0, height - racketHeight);
     racketRY = constrain(racketRY, 0, height - racketHeight);
+    
+    if (mode != 4 && leftScore >= 12 || rightScore >= 12){altmode = mode; mode = 5;}
+  }
+  
+  if (mode == 5){
+    fill(255);
+    rect(5, height - 30, 25, 25);
+    fill(0);
+    textSize(15);
+    text("←", 17.5, height - 18.5);
+    
+    textFont(createFont("Arial Bold", 32));
+    textSize(50);
+    textAlign(CENTER, CENTER);
+    fill(255);
+    
+    if (altmode == 1){
+      text("Spiel zuende", width / 2, 0.4 * height);
+      textSize(32);
+      if (leftScore > rightScore){
+        text("Spieler 1 gewinnt!", width / 2, 0.6 * height);
+      } else {
+        text("Spieler 2 gewinnt!", width / 2, 0.6 * height);
+      }
+    } else if (altmode == 2 || altmode == 3){
+      if (leftScore > rightScore){
+        text("Du gewinnst!", width / 2, 0.5 * height);
+      } else {
+        text("Der Computer gewinnt!", width / 2, 0.5 * height);
+      }
+    }
   }
 }
 
@@ -270,7 +328,7 @@ void mousePressed(){
       if (mouseY > 0.7 * height && mouseY < 0.9 * height){
         mode = 4;
         ballSpeedX *= -1;
-        ballSpeedY = random(-3, 3);
+        while(ballSpeedY < 1 && ballSpeedY > -1){ballSpeedY = random(-3, 3);}
       }
     }
     
@@ -331,20 +389,25 @@ void resetBall() {
   ballSpeedY = 0;
   racketSpeed = 5;
   hitCount = 0;
+  YCap = 0;
   if (mode == 4){
     ballSpeedX *= -1;
-    ballSpeedY = random(-3, 3);
+    while(ballSpeedY < 1 && ballSpeedY > -1){ballSpeedY = random(-3, 3);}
   }
 }
 
 void goHome() {
   mode = 0;
+  altmode = 0;
   difficulty = 0.4;
+  m3Sel = false;
   ballSpeedX = 4;
   ballSpeedY = 0;
   racketSpeed = 5;
   hitCount = 0;
+  YCap = 0;
   racketLY = racketRY = height / 2 - racketHeight / 2;
   ballX = width / 2 - ballDim / 2;
   ballY = height / 2 - ballDim / 2;
+  leftScore = rightScore = 0;
 }
