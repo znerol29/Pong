@@ -1,5 +1,6 @@
 # Remake des klassischen Spiels "Pong" von Atari (1972)
-*Projekt für das Fach Informatik Klasse 11  
+**https://de.wikipedia.org/wiki/Pong**<br><br>
+*Projekt für das Fach Informatik Klasse 11<br>
 Steuerung des Hauptmenüs mit der Maus*
 
 ## Verwendung:
