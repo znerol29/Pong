@@ -147,7 +147,7 @@ void draw() {
       textAlign(CENTER, CENTER);
       textSize(32);
     } else {
-      text(leftScore + "    " + rightScore + ballSpeedB, width / 2, 50);
+      text(leftScore + "    " + rightScore, width / 2, 50);
     }
     
     // Schläger zeichnen
