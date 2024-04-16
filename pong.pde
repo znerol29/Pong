@@ -20,6 +20,7 @@ int ballY;
 int ballDim = 20;
 float ballSpeedX = 4;
 float ballSpeedY = 0;
+float ballSpeedB = 4;
 
 int racketWidth = 10;
 int racketHeight = 80;
@@ -146,7 +147,7 @@ void draw() {
       textAlign(CENTER, CENTER);
       textSize(32);
     } else {
-      text(leftScore + "    " + rightScore, width / 2, 50);
+      text(leftScore + "    " + rightScore + ballSpeedB, width / 2, 50);
     }
     
     // Schläger zeichnen
@@ -165,17 +166,20 @@ void draw() {
     
     // Kolission mit Schlägern
     if (noCollision == false && ballX <= racketWidth && ballY > racketLY - ballDim && ballY < racketLY + racketHeight + ballDim) {
-      if (abs(ballSpeedX) < 11){
-        ballSpeedX = abs(ballSpeedX) + incPerHit;
+      if (abs(ballSpeedB) < 11){
+        ballSpeedB = sqrt(sq(ballSpeedX) + sq(ballSpeedY)) + incPerHit;
+        ballSpeedX = sqrt(sq(ballSpeedB) - sq(ballSpeedY));
         racketSpeed += 0.25;
       } else {ballSpeedX *= -1;}
       
       // Schräges abprallen im oberen & unteren drittel
       if (ballY + ballDim / 2 < racketLY + racketHeight / 3)  {
         ballSpeedY -= 1.5;
+        ballSpeedX = sqrt(sq(ballSpeedB) - sq(ballSpeedY));
       }
       if (ballY + ballDim / 2 > racketLY + racketHeight / 3 * 2) {
         ballSpeedY += 1.5;
+        ballSpeedX = sqrt(sq(ballSpeedB) - sq(ballSpeedY));
       }
       
       noCollision = true; // Verhindern das die richtung mehrfach geändert wird
@@ -183,37 +187,43 @@ void draw() {
       
       if (ballSpeedY <= 0.2){YCap += 1;} // Wiederholtes waagerechtes hin-und-her-spielen verhindern
       if (YCap >= 3) {
-        ballSpeedY += 3;
+        ballSpeedY += random(-3, 3);
+        ballSpeedX = sqrt(sq(ballSpeedB) - sq(ballSpeedY));
         YCap = 0;
       }
     }
     
     if (noCollision == false && ballX >= width - racketWidth - ballDim && ballY > racketRY - ballDim && ballY < racketRY + racketHeight + ballDim) {
-      if (abs(ballSpeedX) < 11){
-        ballSpeedX = -1 * (abs(ballSpeedX) + incPerHit);
+      if (abs(ballSpeedB) < 11){
+        ballSpeedB = -1 * sqrt(sq(ballSpeedX) + sq(ballSpeedY)) - incPerHit;
+        ballSpeedX = -1 * sqrt(sq(ballSpeedB) - sq(ballSpeedY));
         racketSpeed += 0.25;
       } else {ballSpeedX *= -1;}
       
       if (ballY + ballDim / 2 < racketRY + racketHeight / 3)  {
         ballSpeedY -= 1.5;
+        ballSpeedX = -1 * sqrt(sq(ballSpeedB) - sq(ballSpeedY));
       }
       if (ballY + ballDim / 2 > racketRY + racketHeight / 3 * 2) {
         ballSpeedY += 1.5;
+        ballSpeedX = -1 * sqrt(sq(ballSpeedB) - sq(ballSpeedY));
       }
       
       noCollision = true;
       
       if (ballSpeedY <= 0.2){YCap += 1;}
       if (YCap >= 3) {
-        ballSpeedY -= 3;
+        ballSpeedY += random(-3, 3);
+        ballSpeedX = -1 * sqrt(sq(ballSpeedB) - sq(ballSpeedY));
         YCap = 0;
       }
     }
     
     // Mode 4
     if (noCollision == false && mode == 4 && ballX >= width - racketWidth - ballDim) {
-      if (abs(ballSpeedX) < 11){
-        ballSpeedX = -1 * (abs(ballSpeedX) + incPerHit);
+      if (abs(ballSpeedB) < 11){
+        ballSpeedB = -1 * sqrt(sq(ballSpeedX) + sq(ballSpeedY)) - incPerHit;
+        ballSpeedX = -1 * sqrt(sq(ballSpeedB) - sq(ballSpeedY));
         racketSpeed += 0.25;
       } else {ballSpeedX *= -1;}
       noCollision = true;
@@ -387,6 +397,7 @@ void resetBall() {
   ballY = height / 2 - ballDim / 2;
   ballSpeedX = 4;
   ballSpeedY = 0;
+  ballSpeedB = 4;
   racketSpeed = 5;
   hitCount = 0;
   YCap = 0;
@@ -403,6 +414,7 @@ void goHome() {
   m3Sel = false;
   ballSpeedX = 4;
   ballSpeedY = 0;
+  ballSpeedB = 4;
   racketSpeed = 5;
   hitCount = 0;
   YCap = 0;
